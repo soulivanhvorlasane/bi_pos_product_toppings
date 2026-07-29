@@ -77,12 +77,17 @@ patch(PosStore.prototype, {
 });
 
 patch(PosOrderline.prototype, {
-	setup() {
+	setup(_vals) {
         super.setup(...arguments);
-        this.line_toppings = this.line_toppings || [];
-		this.line_topping_ids = this.line_topping_ids || [];
-		this.toppings_total = this.toppings_total || 0;
-		this.toppingdata = this.toppingdata || [];
+        this.line_toppings = _vals.line_toppings || this.line_toppings || [];
+		this.line_topping_ids = _vals.line_topping_ids || this.line_topping_ids || [];
+		this.toppings_total = _vals.toppings_total || this.toppings_total || 0;
+		this.toppingdata = _vals.toppingdata || this.toppingdata || [];
+        if (_vals.topping_data) {
+            try {
+                this.toppingdata = JSON.parse(_vals.topping_data);
+            } catch(e) {}
+        }
     },
 
     getDisplayData() {
@@ -145,8 +150,8 @@ patch(PosOrderline.prototype, {
 		this.toppingdata = json.toppingdata || [];
 	},
 
-	export_as_JSON(){
-		const json = super.export_as_JSON(...arguments);
+	serialize(options = {}){
+		const json = super.serialize(...arguments);
 		json.line_toppings = this.getToppingDetails() || [];
 		json.toppingdata = this.toppingdata || [];
 		json.topping_data = JSON.stringify(this.toppingdata || []);

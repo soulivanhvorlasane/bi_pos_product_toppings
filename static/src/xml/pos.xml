@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+	
+	<t t-name="bi_pos_product_toppings.ToppingsButton">
+		<button class="control-button customer-button btn btn-secondary btn-lg py-5"
+         t-on-click="() => this.onClick()">
+            <i class="fa fa-plus me-1" role="img" aria-label="Toppings" title="Toppings" />
+            Toppings
+        </button>
+   </t>
+
+   <t t-name="bi_pos_product_toppings.ControlButtons" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+       <xpath expr="//div[hasclass('control-buttons')]" position="inside">
+           <ToppingsButton t-if="pos.config.activate_toppings" />
+       </xpath>
+   </t>
+
+   <t t-name="bi_pos_product_toppings.ToppingPopup">
+        <Dialog title="'Toppings'">
+            <div class="product-list popup-topping">
+                <div class="product-list-container" style="overflow: auto; max-height: 360px;">
+                    <t t-if="toppingProducts and toppingProducts.length > 0">
+                        <div class="product-list d-grid p-1">
+                            <t t-foreach="toppingProducts" t-as="product" t-key="product.id">
+                                <article style="background: #eeeeee;" class="product-list d-grid gap-1 p-1" tabindex="0"
+                                    t-on-click="() => this.add_product_toppings(product)"
+                                    t-att-data-product-id="product.id"
+                                    t-attf-aria-labelledby="article_product_{{product.id}}">
+                                    <div class="product-img">
+                                        <img t-att-src="imageUrl(product)" t-att-alt="product.display_name" />
+                                    </div>
+                                    <div class="product-content">
+                                        <div class="product-name" t-attf-id="article_product_{{product.id}}">
+                                            <t t-esc="product.display_name" />
+                                        </div>
+                                        <span class="price-tag">
+                                            <t t-esc="price(product)" />
+                                        </span>
+                                    </div>
+                                </article>
+                             </t>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <p>No Toppings Products are added.</p>
+                    </t>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary cancel" t-on-click="cancel">
+                    Ok
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+	<t t-name="bi_pos_product_toppings.Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+		<xpath expr="//ul[hasclass('info-list')]" position="inside">
+			<t t-set="td" t-value="props.line.toppingsData" />
+			<t t-foreach="td" t-as="ln" t-key="ln.id">
+				<li class="topping-line d-flex align-items-center mt-1 ms-4 fst-italic text-muted">
+					<t t-if="!props.basic_receipt">
+						<button class="remove-selected-line-button btn btn-sm btn-outline-secondary p-1 me-2" t-on-click="() => env.services.pos.get_order().get_orderlines().find(l => l.uuid === props.line.topping_uuid).deleteLine(ln)" style="line-height: 1;">
+							<i class="fa fa-trash-o" />
+						</button>
+					</t>
+					<div class="flex-grow-1 text-truncate">
+						<t t-esc="ln.name"/>
+					</div>
+					<div class="pe-3 text-end" style="min-width: 80px;">
+						<t t-esc="ln.qty"/> at <t t-esc="ln.formatted_rate"/>
+					</div>
+					<div class="text-end" style="min-width: 60px;">
+						<t t-esc="ln.formatted_total"/>
+					</div>
+				</li>
+			</t>
+		</xpath>
+	</t>
+</templates>
+
+

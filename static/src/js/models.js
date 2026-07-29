@@ -132,7 +132,15 @@ patch(PosOrderline.prototype, {
 	init_from_JSON(json){
 		super.init_from_JSON(...arguments);
 		this.line_toppings = json.line_toppings || [];
-		this.line_topping_ids = json.line_topping_ids || [];
+		let restored_topping_ids = [];
+		if (json.line_topping_ids) {
+			for (let t of json.line_topping_ids) {
+				let p_id = (typeof t === 'object') ? t.id : t;
+				let prod = this.models['product.product'].get(p_id);
+				if (prod) restored_topping_ids.push(prod);
+			}
+		}
+		this.line_topping_ids = restored_topping_ids;
 		this.toppings_total = json.toppings_total || 0;
 		this.toppingdata = json.toppingdata || [];
 	},
@@ -141,7 +149,7 @@ patch(PosOrderline.prototype, {
 		const json = super.export_as_JSON(...arguments);
 		json.line_toppings = this.getToppingDetails() || [];
 		json.toppingdata = this.toppingdata || [];
-		json.line_topping_ids = this.line_topping_ids || [];
+		json.line_topping_ids = (this.line_topping_ids || []).map(t => typeof t === 'object' ? t.id : t);
 		json.toppings_total = this.get_toppings_total() || 0;
 		return json;
 	},
@@ -149,7 +157,7 @@ patch(PosOrderline.prototype, {
 	export_for_printing() {
 		const json = super.export_for_printing(...arguments);
 		json.toppingdata = this.toppingdata || [];
-		json.line_topping_ids = this.line_topping_ids || [];
+		json.line_topping_ids = (this.line_topping_ids || []).map(t => typeof t === 'object' ? t.id : t);
 		json.toppings_total = this.toppings_total || 0;
 		return json;
 	},
@@ -172,8 +180,11 @@ patch(PosOrderline.prototype, {
   	},
 	increaseToppingQty(ev) {
 		let toppings = this.get_line_topping_ids();
-		toppings.push(ev.id);
-		this.set_line_topping_ids(toppings);
+		let product = this.models['product.product'].get(ev.id);
+		if (product) {
+			toppings.push(product);
+			this.set_line_topping_ids(toppings);
+		}
 		let details  = this.getToppingDetails();
 		let total_arr = details.map(item => item.total);
 		let sum = total_arr.reduce((a, b) => a + b, 0);
@@ -186,6 +197,7 @@ patch(PosOrderline.prototype, {
 			this.order_id.recomputeOrderData();
 		}
 	},
+
 	decreaseToppingQty(ev) {
 		let toppings = this.get_line_topping_ids();
 		let index = toppings.findIndex(value => (typeof value === 'object' ? value.id : value) == ev.id);

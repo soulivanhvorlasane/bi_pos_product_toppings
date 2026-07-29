@@ -77,7 +77,16 @@ class pos_order(models.Model):
 		new_lines = []
 		for lines in odr.get('lines', []):
 			if isinstance(lines, (list, tuple)) and len(lines) > 2:
-				toppingdata = lines[2].get('toppingdata',False)
+				toppingdata = []
+				topping_data_str = lines[2].get('topping_data', '[]')
+				try:
+					if topping_data_str:
+						toppingdata = json.loads(topping_data_str)
+				except Exception:
+					pass
+				if not toppingdata:
+					toppingdata = lines[2].get('toppingdata', [])
+
 				combo_list = []
 				if toppingdata:
 					for product in toppingdata:
@@ -254,9 +263,10 @@ class pos_order_line(models.Model):
 	_inherit = 'pos.order.line'
 
 	line_topping_ids = fields.Many2many("product.product",string="Product Toppings")
+	topping_data = fields.Text(string="Topping Data JSON")
 
 	@api.model
 	def _load_pos_data_fields(self, config_id):
 		fields = super()._load_pos_data_fields(config_id)
-		fields.extend(['line_topping_ids'])
+		fields.extend(['line_topping_ids', 'topping_data'])
 		return fields

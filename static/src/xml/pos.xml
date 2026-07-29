@@ -60,8 +60,14 @@
 			<t t-foreach="td" t-as="ln" t-key="ln.id">
 				<li class="topping-line d-flex align-items-center mt-1 ms-4 fst-italic text-muted">
 					<t t-if="!props.basic_receipt">
-						<button class="remove-selected-line-button btn btn-sm btn-outline-secondary p-1 me-2" t-on-click="() => env.services.pos.get_order().get_orderlines().find(l => l.uuid === props.line.topping_uuid).deleteLine(ln)" style="line-height: 1;">
+						<button class="remove-selected-line-button btn btn-sm btn-outline-secondary p-1 me-1" t-on-click="() => env.services.pos.get_order().get_orderlines().find(l => l.uuid === props.line.topping_uuid).deleteLine(ln)" style="line-height: 1;" title="Remove All">
 							<i class="fa fa-trash-o" />
+						</button>
+						<button class="btn btn-sm btn-outline-secondary p-1 me-1" t-on-click="() => env.services.pos.get_order().get_orderlines().find(l => l.uuid === props.line.topping_uuid).decreaseToppingQty(ln)" style="line-height: 1; width: 24px;" title="Decrease Qty">
+							<i class="fa fa-minus" />
+						</button>
+						<button class="btn btn-sm btn-outline-secondary p-1 me-2" t-on-click="() => env.services.pos.get_order().get_orderlines().find(l => l.uuid === props.line.topping_uuid).increaseToppingQty(ln)" style="line-height: 1; width: 24px;" title="Increase Qty">
+							<i class="fa fa-plus" />
 						</button>
 					</t>
 					<div class="flex-grow-1 text-truncate">

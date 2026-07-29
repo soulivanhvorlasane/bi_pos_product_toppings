@@ -156,7 +156,7 @@ patch(PosOrderline.prototype, {
 
   	deleteLine(ev){
   		let toppings = this.get_line_topping_ids();
-  		let y = toppings.filter(value => value.id != ev.id);
+  		let y = toppings.filter(value => (typeof value === 'object' ? value.id : value) != ev.id);
   		this.set_line_topping_ids(y);
   		let details  = this.getToppingDetails();
         let total_arr = details.map(item => item.total);
@@ -170,6 +170,41 @@ patch(PosOrderline.prototype, {
             this.order_id.recomputeOrderData();
         }
   	},
+	increaseToppingQty(ev) {
+		let toppings = this.get_line_topping_ids();
+		toppings.push(ev.id);
+		this.set_line_topping_ids(toppings);
+		let details  = this.getToppingDetails();
+		let total_arr = details.map(item => item.total);
+		let sum = total_arr.reduce((a, b) => a + b, 0);
+		let base_price = this.get_product().get_price(this.order_id?.pricelist_id || null, this.get_quantity());
+		this.price_type = "manual";
+		this.set_unit_price(base_price + sum);
+		this.update({ price_unit: base_price + sum });
+		this.price_manually_set = true;
+		if (this.order_id && typeof this.order_id.recomputeOrderData === 'function') {
+			this.order_id.recomputeOrderData();
+		}
+	},
+	decreaseToppingQty(ev) {
+		let toppings = this.get_line_topping_ids();
+		let index = toppings.findIndex(value => (typeof value === 'object' ? value.id : value) == ev.id);
+		if (index !== -1) {
+			toppings.splice(index, 1);
+		}
+		this.set_line_topping_ids(toppings);
+		let details  = this.getToppingDetails();
+		let total_arr = details.map(item => item.total);
+		let sum = total_arr.reduce((a, b) => a + b, 0);
+		let base_price = this.get_product().get_price(this.order_id?.pricelist_id || null, this.get_quantity());
+		this.price_type = "manual";
+		this.set_unit_price(base_price + sum);
+		this.update({ price_unit: base_price + sum });
+		this.price_manually_set = true;
+		if (this.order_id && typeof this.order_id.recomputeOrderData === 'function') {
+			this.order_id.recomputeOrderData();
+		}
+	},
 
 	get_toppingsData(){
 		return this.toppingdata || [];

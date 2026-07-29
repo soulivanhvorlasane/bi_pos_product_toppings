@@ -93,7 +93,7 @@ class pos_order(models.Model):
 							'name': product.get('name',"-"),
 						}]
 						new_lines.append(vals)
-		# order['lines'].extend(new_lines)
+		order['lines'].extend(new_lines)
 		return super(pos_order, self)._process_order(order, existing_order)
 
 	def _process_preparation_changes(self, cancelled=False, general_note=None, note_history=None, **kwargs):

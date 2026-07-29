@@ -152,11 +152,13 @@ patch(PosOrderline.prototype, {
 
 	serialize(options = {}){
 		const json = super.serialize(...arguments);
-		json.line_toppings = this.getToppingDetails() || [];
-		json.toppingdata = this.toppingdata || [];
+        if (!options.orm) {
+            json.line_toppings = this.getToppingDetails() || [];
+            json.toppingdata = this.toppingdata || [];
+            json.toppings_total = this.get_toppings_total() || 0;
+        }
 		json.topping_data = JSON.stringify(this.toppingdata || []);
 		json.line_topping_ids = (this.line_topping_ids || []).map(t => typeof t === 'object' ? t.id : t);
-		json.toppings_total = this.get_toppings_total() || 0;
 		return json;
 	},
 

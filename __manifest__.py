@@ -17,6 +17,7 @@
 	'data': [
 		'security/ir.model.access.csv',
 		'views/pos_config_inherit.xml',
+		'views/pos_topping_report_views.xml',
 		'wizard/topping_wizard_view.xml',
 	],
 	'assets': {

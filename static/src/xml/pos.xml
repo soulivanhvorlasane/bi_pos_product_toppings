@@ -23,19 +23,34 @@
                         <div class="product-list d-grid p-1">
                             <t t-foreach="toppingProducts" t-as="product" t-key="product.id">
                                 <article style="background: #eeeeee;" class="product-list d-grid gap-1 p-1" tabindex="0"
-                                    t-on-click="() => this.add_product_toppings(product)"
                                     t-att-data-product-id="product.id"
                                     t-attf-aria-labelledby="article_product_{{product.id}}">
                                     <div class="product-img">
                                         <img t-att-src="imageUrl(product)" t-att-alt="product.display_name" />
                                     </div>
-                                    <div class="product-content">
-                                        <div class="product-name" t-attf-id="article_product_{{product.id}}">
-                                            <t t-esc="product.display_name" />
+                                    <div class="product-content d-flex flex-column justify-content-between">
+                                        <div>
+                                            <div class="product-name" t-attf-id="article_product_{{product.id}}">
+                                                <t t-esc="product.display_name" />
+                                            </div>
+                                            <div class="text-muted small">
+                                                Stock: <t t-esc="product.qty_available" /> <t t-esc="product.uom_id ? product.uom_id[1] : ''" />
+                                            </div>
                                         </div>
-                                        <span class="price-tag">
-                                            <t t-esc="price(product)" />
-                                        </span>
+                                        <div class="d-flex justify-content-between align-items-center mt-2">
+                                            <span class="price-tag m-0 position-relative p-1">
+                                                <t t-esc="price(product)" />
+                                            </span>
+                                            <div class="qty-control d-flex align-items-center bg-white rounded border">
+                                                <button class="btn btn-sm btn-light px-2 border-0" t-on-click.stop="() => this.updateQty(product.id, -1)">
+                                                    <i class="fa fa-minus" />
+                                                </button>
+                                                <span class="px-2 fw-bold" style="min-width: 30px; text-align: center;"><t t-esc="state.quantities[product.id] || 0" /></span>
+                                                <button class="btn btn-sm btn-light px-2 border-0" t-on-click.stop="() => this.updateQty(product.id, 1)">
+                                                    <i class="fa fa-plus" />
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </article>
                              </t>

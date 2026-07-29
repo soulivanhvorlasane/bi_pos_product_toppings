@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
@@ -17,6 +17,19 @@ export class ToppingPopup extends Component {
     setup() {
         super.setup();
         this.pos = usePos();
+        
+        let initialQuantities = {};
+        let order = this.pos.get_order();
+        let orderline = order ? order.get_selected_orderline() : null;
+        if (orderline && typeof orderline.getToppingDetails === 'function') {
+            let details = orderline.getToppingDetails();
+            for (let item of details) {
+                initialQuantities[item.id] = item.qty;
+            }
+        }
+        this.state = useState({
+            quantities: initialQuantities
+        });
     }
    
    	imageUrl(product) {
@@ -46,28 +59,42 @@ export class ToppingPopup extends Component {
 		return this.props.toppings;
 	}
 
-	add_product_toppings(ev){
-		let product = ev;
-		let order = this.pos.get_order();
-		let orderline = order.get_selected_orderline();
-		let old_recs = orderline.get_line_topping_ids();
-		old_recs.push(product);
-		orderline.set_line_topping_ids(old_recs);
-		let details  = orderline.getToppingDetails();
-		let total_arr = details.map(item => item.total);
-		let sum = total_arr.reduce((a, b) => a + b, 0);
-        
-        let base_price = orderline.get_product().get_price(orderline.order_id?.pricelist_id || null, orderline.get_quantity());
-        orderline.price_type = "manual";
-		orderline.set_unit_price(base_price + sum);
-        orderline.update({ price_unit: base_price + sum });
-		orderline.price_manually_set = true;
-        if (orderline.order_id && typeof orderline.order_id.recomputeOrderData === 'function') {
-            orderline.order_id.recomputeOrderData();
-        }
-	}
+    updateQty(productId, change) {
+        let current = this.state.quantities[productId] || 0;
+        let next = current + change;
+        if (next < 0) next = 0;
+        this.state.quantities[productId] = next;
+    }
 
     cancel() {
+        let order = this.pos.get_order();
+        let orderline = order ? order.get_selected_orderline() : null;
+        if (orderline && typeof orderline.set_line_topping_ids === 'function') {
+            let new_recs = [];
+            for (let productId in this.state.quantities) {
+                let qty = this.state.quantities[productId];
+                let product = this.pos.models['product.product'].get(parseInt(productId));
+                if (product && qty > 0) {
+                    for (let i = 0; i < qty; i++) {
+                        new_recs.push(product);
+                    }
+                }
+            }
+            orderline.set_line_topping_ids(new_recs);
+            
+            let details  = orderline.getToppingDetails();
+            let total_arr = details.map(item => item.total);
+            let sum = total_arr.reduce((a, b) => a + b, 0);
+            
+            let base_price = orderline.get_product().get_price(orderline.order_id?.pricelist_id || null, orderline.get_quantity());
+            orderline.price_type = "manual";
+            orderline.set_unit_price(base_price + sum);
+            orderline.update({ price_unit: base_price + sum });
+            orderline.price_manually_set = true;
+            if (orderline.order_id && typeof orderline.order_id.recomputeOrderData === 'function') {
+                orderline.order_id.recomputeOrderData();
+            }
+        }
         this.props.close();
     }
 }

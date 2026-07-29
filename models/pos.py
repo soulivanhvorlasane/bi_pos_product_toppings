@@ -21,7 +21,7 @@ class ProductProduct(models.Model):
 	@api.model
 	def _load_pos_data_fields(self, config_id):
 		fields = super()._load_pos_data_fields(config_id)
-		fields.extend(['is_topping', 'topping_group_ids', 'topping_ids'])
+		fields.extend(['is_topping', 'topping_group_ids', 'topping_ids', 'qty_available', 'uom_id'])
 		return fields
 		
 

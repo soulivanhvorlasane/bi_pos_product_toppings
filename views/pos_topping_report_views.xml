@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_order_line_topping_pivot" model="ir.ui.view">
+        <field name="name">pos.order.line.topping.pivot</field>
+        <field name="model">pos.order.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Topping Usage Analysis" sample="1">
+                <field name="product_id" type="row"/>
+                <field name="create_date" type="col" interval="day"/>
+                <field name="qty" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_pos_order_line_topping_graph" model="ir.ui.view">
+        <field name="name">pos.order.line.topping.graph</field>
+        <field name="model">pos.order.line</field>
+        <field name="arch" type="xml">
+            <graph string="Topping Usage Analysis" sample="1">
+                <field name="product_id"/>
+                <field name="qty" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_pos_topping_report" model="ir.actions.act_window">
+        <field name="name">Toppings Usage</field>
+        <field name="res_model">pos.order.line</field>
+        <field name="view_mode">pivot,graph,tree</field>
+        <field name="domain">[('product_id.is_topping', '=', True)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No topping usage data found!
+            </p>
+            <p>
+                This report displays the usage of toppings across all Point of Sale orders.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_pos_topping_report"
+              name="Toppings Usage"
+              parent="point_of_sale.menu_point_rep"
+              action="action_pos_topping_report"
+              sequence="20"/>
+</odoo>

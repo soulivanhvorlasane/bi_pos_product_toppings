@@ -77,6 +77,11 @@ class pos_order(models.Model):
 		new_lines = []
 		for lines in odr.get('lines', []):
 			if isinstance(lines, (list, tuple)) and len(lines) > 2:
+				# Remove frontend-only fields to prevent "Invalid field" errors from stuck payloads
+				lines[2].pop('line_toppings', None)
+				lines[2].pop('toppingdata', None)
+				lines[2].pop('toppings_total', None)
+				
 				toppingdata = []
 				topping_data_str = lines[2].get('topping_data', '[]')
 				try:

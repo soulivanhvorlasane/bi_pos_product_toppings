@@ -13,6 +13,9 @@ class ProductTemplate(models.Model):
 class ProductProduct(models.Model):
 	_inherit = 'product.product'
 
+	topping_group_ids = fields.Many2many(related='product_tmpl_id.topping_group_ids', readonly=False)
+	topping_ids = fields.Many2many(related='product_tmpl_id.topping_ids', readonly=False)
+
 	@api.onchange('topping_group_ids')
 	def onchange_topping_group_ids(self):
 		for rec in self.topping_group_ids:
@@ -73,6 +76,7 @@ class pos_order(models.Model):
 
 	@api.model
 	def _process_order(self, order, existing_order):
+		import uuid
 		odr = order
 		new_lines = []
 		for lines in odr.get('lines', []):
@@ -81,6 +85,10 @@ class pos_order(models.Model):
 				lines[2].pop('line_toppings', None)
 				lines[2].pop('toppingdata', None)
 				lines[2].pop('toppings_total', None)
+				
+				# Convert Many2many to ORM command
+				if 'line_topping_ids' in lines[2] and isinstance(lines[2]['line_topping_ids'], list):
+					lines[2]['line_topping_ids'] = [[6, False, lines[2]['line_topping_ids']]]
 				
 				toppingdata = []
 				topping_data_str = lines[2].get('topping_data', '[]')
@@ -105,6 +113,7 @@ class pos_order(models.Model):
 							'tax_ids': [[6, False, []]],
 							'full_product_name': product.get('name',"-"),
 							'name': product.get('name',"-"),
+							'uuid': str(uuid.uuid4()),
 						}]
 						new_lines.append(vals)
 		order['lines'].extend(new_lines)

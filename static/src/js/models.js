@@ -7,6 +7,7 @@ import { patch } from "@web/core/utils/patch";
 import { Orderline } from "@point_of_sale/app/generic_components/orderline/orderline";
 import { ToppingPopup } from "@bi_pos_product_toppings/js/ToppingPopup";
 import { formatCurrency } from "@point_of_sale/app/models/utils/currency";
+import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
 
 if (Orderline.props && Orderline.props.line && Orderline.props.line.shape) {
     Orderline.props.line.shape.toppingsData = { type: Array, optional: true };
@@ -271,4 +272,11 @@ patch(PosOrderline.prototype, {
 		return prod_list;
 	},
 
+});
+
+patch(ProductScreen.prototype, {
+    get productsToDisplay() {
+        let products = super.productsToDisplay;
+        return products.filter(p => !p.is_topping);
+    }
 });

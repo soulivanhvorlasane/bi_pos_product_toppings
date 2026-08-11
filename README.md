@@ -32,30 +32,34 @@ Users can:
 - POS Preparation Display (`pos_preparation_display`)
 
 ## Configuration Steps
-To properly set up and use product toppings, follow these steps:
+To properly set up and use product toppings in your Odoo POS, please follow this complete step-by-step guide carefully:
 
-1. **Enable POS Toppings**: 
+1. **Enable POS Toppings & Define Default Behavior**: 
    - Go to **Point of Sale > Configuration > Settings**.
    - Scroll down to the *POS Toppings Configuration* section and check **Enable Toppings**.
-   - *(Optional)*: Uncheck **Add toppings on product add** if you want cashiers to manually select toppings from a popup screen. If checked, default toppings are added automatically.
+   - **Important Choice:** 
+     - **Check "Add toppings on product add":** If you want the default toppings to be *automatically* added to the cart whenever a cashier clicks the main product (bypassing the popup). Cashiers can still edit them later via the "Actions -> Toppings" button.
+     - **Uncheck "Add toppings on product add":** If you want the Topping Popup screen to automatically appear *every time* the cashier clicks the main product, starting with a quantity of 0, so they can manually choose toppings before pressing Ok.
 
 2. **Create Topping Products**:
-   - Go to **Point of Sale > Products > Products** and create a new product (e.g., "Extra Cheese").
+   - Go to **Point of Sale > Products > Products** and create a new product (e.g., "Strawberry", "Extra Cheese").
    - Under the **Point of Sale** tab, check the **Is Topping** checkbox.
-   - Set the sales price for the topping.
+   - Set the Sales Price for the topping (this price will be dynamically added to the total).
+   - **CRITICAL STEP FOR "LIMIT CATEGORIES":** If your POS uses the "Limit Categories" setting (e.g., your Bakery only loads "Breads" and "Pastries"), Odoo will refuse to load topping products unless they belong to an allowed category. 
+     - **Pro Tip:** Create a new POS Category called **"Toppings"**, assign your topping products to it, and add "Toppings" to your allowed POS categories. Thanks to our built-in UI patch, toppings will *never* clutter your main POS screen, but they will load perfectly for the popup!
 
 3. **Create Topping Groups (Optional)**:
    - Go to **Point of Sale > Configuration > Topping Groups**.
-   - Create a group (e.g., "Pizza Toppings") and add your topping products to it.
+   - Create a group (e.g., "Ice Cream Toppings") and add your topping products to it for easier mass assignment.
 
 4. **Assign Toppings to Main Products**:
-   - Open a regular product (e.g., "Apple Pie").
-   - Navigate to the **Toppings** tab.
+   - Open a regular product that you want to sell with toppings (e.g., "Apple Pie").
+   - Navigate to the **Toppings** tab on the product form.
    - Add specific toppings directly, or select a **Topping Group**.
 
 5. **Sell in POS**:
    - Open a new POS session.
-   - Click on the main product. A popup will appear allowing you to add or remove toppings before adding it to the cart.
+   - Click on the main product. Depending on your configuration in Step 1, the popup will appear allowing you to precisely adjust topping quantities using the fast `+` and `-` buttons before adding it to the cart!
 
 ## Screenshots
 

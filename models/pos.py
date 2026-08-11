@@ -63,7 +63,6 @@ class PosConfig(models.Model):
 	activate_toppings = fields.Boolean('Enable Product Toppings')
 	add_topping_default = fields.Boolean('Add toppings on product add')
 
-
 class ResConfigSettings(models.TransientModel):
 	_inherit = 'res.config.settings'
 
@@ -76,15 +75,18 @@ class pos_order(models.Model):
 
 	@api.model
 	def _process_order(self, order, existing_order):
-		import uuid
-		odr = order
-		new_lines = []
-		for lines in odr.get('lines', []):
-			if isinstance(lines, (list, tuple)) and len(lines) > 2:
-				# Remove frontend-only fields to prevent "Invalid field" errors from stuck payloads
-				lines[2].pop('line_toppings', None)
-				lines[2].pop('toppingdata', None)
-				lines[2].pop('toppings_total', None)
+		import traceback
+		try:
+			import uuid
+			odr = order
+			new_lines = []
+			for lines in odr.get('lines', []):
+				if isinstance(lines, (list, tuple)) and len(lines) > 2:
+					# Remove frontend-only fields to prevent "Invalid field" errors from stuck payloads
+					lines[2].pop('line_toppings', None)
+					lines[2].pop('toppingdata', None)
+					lines[2].pop('toppings_total', None)
+
 				
 				# Convert Many2many to ORM command
 				if 'line_topping_ids' in lines[2] and isinstance(lines[2]['line_topping_ids'], list):
@@ -116,13 +118,28 @@ class pos_order(models.Model):
 							'uuid': str(uuid.uuid4()),
 						}]
 						new_lines.append(vals)
-		order['lines'].extend(new_lines)
-		return super(pos_order, self)._process_order(order, existing_order)
+			order['lines'].extend(new_lines)
+			return super(pos_order, self)._process_order(order, existing_order)
+		except Exception as e:
+			with open(r'd:\development\odoo\odoo18\process_order_error.log', 'w') as f:
+				f.write(traceback.format_exc())
+			raise e
 
-	def _process_preparation_changes(self, cancelled=False, general_note=None, note_history=None, **kwargs):
+	def _process_preparation_changes(self, *args, **kwargs):
+		import traceback
+		try:
+			return self._real_process_preparation_changes(*args, **kwargs)
+		except Exception as e:
+			with open(r'd:\development\odoo\odoo18\pdis_error.log', 'w') as f:
+				f.write(traceback.format_exc())
+			raise e
+
+	def _real_process_preparation_changes(self, cancelled=False, general_note=None, note_history=None, **kwargs):
 		self.ensure_one()
 		flag_change = False
 		sound = False
+
+
 
 		pdis_order = self.env['pos_preparation_display.order'].search(
 			[('pos_order_id', '=', self.id)]
@@ -132,11 +149,11 @@ class pos_order(models.Model):
 			if not pdis_order and general_note:
 				pdis_order = self.env['pos_preparation_display.order'].create({
 					'pos_order_id': self.id,
-					'general_note': general_note,
+					'pdis_general_note': general_note,
 				})
 				flag_change = True
-			elif pdis_order and pdis_order.general_note != general_note:
-				pdis_order.general_note = general_note
+			elif pdis_order and pdis_order.pdis_general_note != general_note:
+				pdis_order.pdis_general_note = general_note
 				flag_change = True
 
 		pdis_lines = pdis_order.preparation_display_order_line_ids
@@ -262,6 +279,9 @@ class pos_order(models.Model):
 						qty_to_cancel -= pdis_qty
 
 		return {'change': flag_change, 'sound': sound, 'category_ids': category_ids}
+
+
+
 
 
 class POSSession(models.Model):

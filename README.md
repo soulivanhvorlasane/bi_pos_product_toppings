@@ -31,6 +31,12 @@ Users can:
 - POS Restaurant (`pos_restaurant`)
 - POS Preparation Display (`pos_preparation_display`)
 
+## Screenshots
+
+### Configuration
+![Configuration](static/description/11_config.png)
+![Configuration 2](static/description/18_config.png)
+
 ## Changelog
 - **Version 18.0.0.2**
   - Added Inventory Control integration to properly deduct topping stock via real-time stock moves.

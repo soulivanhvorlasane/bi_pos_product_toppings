@@ -31,6 +31,32 @@ Users can:
 - POS Restaurant (`pos_restaurant`)
 - POS Preparation Display (`pos_preparation_display`)
 
+## Configuration Steps
+To properly set up and use product toppings, follow these steps:
+
+1. **Enable POS Toppings**: 
+   - Go to **Point of Sale > Configuration > Settings**.
+   - Scroll down to the *POS Toppings Configuration* section and check **Enable Toppings**.
+   - *(Optional)*: Uncheck **Add toppings on product add** if you want cashiers to manually select toppings from a popup screen. If checked, default toppings are added automatically.
+
+2. **Create Topping Products**:
+   - Go to **Point of Sale > Products > Products** and create a new product (e.g., "Extra Cheese").
+   - Under the **Point of Sale** tab, check the **Is Topping** checkbox.
+   - Set the sales price for the topping.
+
+3. **Create Topping Groups (Optional)**:
+   - Go to **Point of Sale > Configuration > Topping Groups**.
+   - Create a group (e.g., "Pizza Toppings") and add your topping products to it.
+
+4. **Assign Toppings to Main Products**:
+   - Open a regular product (e.g., "Apple Pie").
+   - Navigate to the **Toppings** tab.
+   - Add specific toppings directly, or select a **Topping Group**.
+
+5. **Sell in POS**:
+   - Open a new POS session.
+   - Click on the main product. A popup will appear allowing you to add or remove toppings before adding it to the cart.
+
 ## Screenshots
 
 ### Configuration
